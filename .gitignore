@@ -1,0 +1,31 @@
+# Dataset folder (too large for GitHub)
+fer2013/
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Database (contains user data)
+database.db
+
+# Model file (too large for GitHub - we'll upload separately or use cloud storage)
+face_emotionModel.h5
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploaded images (if we store them locally)
+uploads/

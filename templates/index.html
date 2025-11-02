@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Emotion Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-button {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: block;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        
+        .file-input-button:hover {
+            background: #5568d3;
+        }
+        
+        input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        #file-name {
+            margin-top: 10px;
+            color: #666;
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        #image-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        #preview-img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        
+        .result p {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .emotion-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .confidence {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .error {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #ffe6e6;
+            border-left: 4px solid #ff4444;
+            border-radius: 8px;
+            color: #cc0000;
+        }
+        
+        .stats-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .stats-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .stats-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>😊 Face Emotion Detection</h1>
+        <p class="subtitle">Upload your photo and discover your emotion!</p>
+        
+        <form id="emotion-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your name">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" name="age" min="1" max="120" placeholder="Optional">
+            </div>
+            
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                    <option value="">Select (Optional)</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Upload Your Photo *</label>
+                <div class="file-input-wrapper">
+                    <label for="image" class="file-input-button">
+                        📷 Choose Image
+                    </label>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+                <div id="file-name"></div>
+                <div id="image-preview"></div>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submit-btn">
+                Detect My Emotion
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Analyzing your emotion...</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="result" id="result">
+            <h2>🎯 Result</h2>
+            <p><strong>Hello, <span id="result-name"></span>!</strong></p>
+            <p>Detected Emotion: <span class="emotion-badge" id="emotion"></span></p>
+            <p class="confidence">Confidence: <span id="confidence"></span>%</p>
+            <p id="message" style="margin-top: 15px; font-size: 16px;"></p>
+        </div>
+        
+        <div class="stats-link">
+            <a href="/stats" target="_blank">📊 View Statistics</a>
+        </div>
+    </div>
+    
+    <script>
+        // Image preview
+        document.getElementById('image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('file-name');
+            const preview = document.getElementById('image-preview');
+            
+            if (file) {
+                fileName.textContent = `Selected: ${file.name}`;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.innerHTML = `<img id="preview-img" src="${event.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                fileName.textContent = '';
+                preview.innerHTML = '';
+            }
+        });
+        
+        // Form submission
+        document.getElementById('emotion-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            
+            // Hide previous results
+            result.style.display = 'none';
+            error.style.display = 'none';
+            
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            
+            // Prepare form data
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                
+                if (data.success) {
+                    // Show result
+                    document.getElementById('result-name').textContent = data.name;
+                    document.getElementById('emotion').textContent = data.emotion;
+                    document.getElementById('confidence').textContent = data.confidence;
+                    document.getElementById('message').textContent = data.message;
+                    result.style.display = 'block';
+                    
+                    // Scroll to result
+                    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    // Show error
+                    error.textContent = data.error || 'An error occurred';
+                    error.style.display = 'block';
+                }
+            } catch (err) {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                error.textContent = 'Network error. Please try again.';
+                error.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
