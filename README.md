@@ -55,12 +55,13 @@ FACE_DETECTION/
 ├── app.py
 ├── model_training.py
 ├── requirements.txt
-├── Procfile                  # NEW
-├── runtime.txt               # NEW
-├── README.md                 # NEW
+├── Procfile                  
+├── runtime.txt               
+├── README.md                 
 ├── .gitignore
+├── .gitattributes
 ├── link_web_app.txt
 │
-├── face_emotionModel.h5      # Your trained model (~50MB)
+├── face_emotionModel.h5      # Your trained model 
 ├── database.db               # (will be created/reset on deployment)
-└── training_history.png      # (optional, for documentation)
+└── training_history.png      # (optional)
